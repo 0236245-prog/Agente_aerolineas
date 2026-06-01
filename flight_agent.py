@@ -234,7 +234,10 @@ agent = Agent(
 async def main():
     print("✈️  Agente de Retrasos de Vuelos")
     print("   Escribe tu pregunta o 'salir' para terminar.\n")
-
+ 
+    # Historial acumulado entre turnos para mantener contexto
+    history = []
+ 
     while True:
         user_input = input("Tú: ").strip()
         if not user_input:
@@ -242,10 +245,16 @@ async def main():
         if user_input.lower() in ["salir", "exit", "quit"]:
             print("👋 ¡Hasta luego!")
             break
-
-        result = await Runner.run(agent, input=user_input)
+ 
+        # Si hay historial lo pasamos, si no pasamos solo el input actual
+        input_with_history = history + [{"role": "user", "content": user_input}]
+ 
+        result = await Runner.run(agent, input=input_with_history)
         print(f"\n🤖 Agente: {result.final_output}\n")
-
-
+ 
+        # Guardamos el historial completo de este turno para el siguiente
+        history = result.to_input_list()
+ 
+ 
 if __name__ == "__main__":
     asyncio.run(main())
